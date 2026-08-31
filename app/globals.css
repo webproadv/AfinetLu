@@ -75,6 +75,8 @@ body {
 .timeline-item.stato-in_ritardo .timeline-num { background: #ef4444; color: white; }
 .timeline-item.stato-da_iniziare .timeline-num,
 .timeline-item.stato-in_corso .timeline-num { background: #f59e0b; color: #2a1a00; }
+.timeline-item.fuori-sla { background: rgba(248,113,113,0.06); border-radius: 8px; padding-left: 8px; }
+.timeline-item.fuori-sla .timeline-num { background: #ef4444; color: white; }
 .timeline-title { margin: 0; font-weight: 600; font-size: 14px; color: #f3f4f6; }
 .timeline-sub { margin: 2px 0 0; font-size: 12px; color: #9ca3af; }
 .form-card { background: #1a1d24; border: 1px solid #2a2e38; border-radius: 12px; padding: 24px; max-width: 480px; }
