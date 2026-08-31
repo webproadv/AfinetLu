@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '../../../lib/supabase-server';
+import { isFuoriSla } from '../../../lib/sla';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { notFound } from 'next/navigation';
@@ -74,12 +75,16 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
           const sonoAssegnato =
             sonoAdmin || (f.fasi_istanza_owners || []).some((r: any) => r.utenti_owner?.id === io?.id);
           const puoCompletare = f.stato !== 'completata' && f.stato !== 'bloccata' && sonoAssegnato;
+          const fuoriSla = isFuoriSla(f);
 
           return (
-            <div className={`timeline-item stato-${f.stato}`} key={f.id}>
+            <div className={`timeline-item stato-${f.stato}${fuoriSla ? ' fuori-sla' : ''}`} key={f.id}>
               <div className="timeline-num">{String(f.fasi_template.numero).padStart(2, '0')}</div>
               <div className="timeline-body">
-                <p className="timeline-title">{f.fasi_template.nome}</p>
+                <p className="timeline-title">
+                  {f.fasi_template.nome}
+                  {fuoriSla && <span className="badge badge-danger" style={{ marginLeft: 8 }}>Fuori SLA</span>}
+                </p>
                 <p className="timeline-sub">
                   Owner: {ownerNomi.length > 0 ? ownerNomi.join(', ') : '—'} · Scadenza teorica:{' '}
                   {f.data_scadenza_teorica || '—'} · Stato: {STATO_LABEL[f.stato]}
