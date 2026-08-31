@@ -1,0 +1,22 @@
+{
+  "name": "afinet",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.5.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "next": "14.2.25",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3"
+  }
+}
