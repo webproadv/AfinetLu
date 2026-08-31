@@ -32,7 +32,7 @@ export default async function DashboardPage({
   const { data: clienti, error } = await supabase
     .from('clienti')
     .select(
-      'id, ragione_sociale, fasi_istanza(id, stato, fasi_template(numero, nome), fasi_istanza_owners(utenti_owner(id, nome)))'
+      'id, ragione_sociale, fasi_istanza(id, stato, data_scadenza_teorica, fasi_template(numero, nome), fasi_istanza_owners(utenti_owner(id, nome)))'
     )
     .order('creato_il', { ascending: false });
 
