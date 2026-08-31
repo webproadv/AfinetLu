@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="it">
         <body>
           <header className="topbar">
-            <Link href="/dashboard" className="brand">Afinet</Link>
+            <Link href="/dashboard" className="brand">Gestione Clienti Afinet</Link>
             <nav>
               <SignedIn>
                 <Link href="/dashboard">Dashboard</Link>
