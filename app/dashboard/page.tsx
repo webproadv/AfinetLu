@@ -1,10 +1,12 @@
 import { createSupabaseServerClient } from '../../lib/supabase-server';
+import { isFuoriSla } from '../../lib/sla';
 import Link from 'next/link';
 import OwnerFilter from './owner-filter';
 
 export const dynamic = 'force-dynamic';
 
-function segClass(stato: string) {
+function segClass(stato: string, fuoriSla: boolean) {
+  if (fuoriSla) return 'seg seg-red';
   if (stato === 'completata') return 'seg seg-green';
   if (stato === 'in_ritardo') return 'seg seg-red';
   if (stato === 'in_corso' || stato === 'da_iniziare') return 'seg seg-amber';
@@ -59,7 +61,7 @@ export default async function DashboardPage({
       (a: any, b: any) => a.fasi_template.numero - b.fasi_template.numero
     );
     const faseCorrente = fasi.find((f: any) => f.stato !== 'completata') ?? fasi[fasi.length - 1];
-    const haRitardo = fasi.some((f: any) => f.stato === 'in_ritardo');
+    const haRitardo = fasi.some((f: any) => f.stato === 'in_ritardo' || isFuoriSla(f));
     const inCorso = !haRitardo && fasi.some((f: any) => f.stato === 'in_corso' || f.stato === 'da_iniziare');
     const ownerFaseCorrente = (faseCorrente?.fasi_istanza_owners || [])
       .map((r: any) => r.utenti_owner?.nome)
@@ -132,7 +134,11 @@ export default async function DashboardPage({
             </div>
             <div className="seg-bar">
               {fasi.map((f: any) => (
-                <div key={f.id} className={segClass(f.stato)} title={`${f.fasi_template.nome}: ${STATO_LABEL[f.stato]}`} />
+                <div
+                  key={f.id}
+                  className={segClass(f.stato, isFuoriSla(f))}
+                  title={`${f.fasi_template.nome}: ${isFuoriSla(f) ? 'Fuori SLA' : STATO_LABEL[f.stato]}`}
+                />
               ))}
             </div>
           </Link>
