@@ -78,6 +78,14 @@ body {
 .client-header h2 { margin: 0 0 4px; color: #f9fafb; }
 .client-header p { margin: 2px 0; color: #9ca3af; font-size: 14px; }
 .client-header p a { color: #93c5fd; }
+.drive-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(21,72,224,0.15); color: #93c5fd; border: 1px solid rgba(21,72,224,0.4);
+  border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 600; text-decoration: none;
+}
+.drive-link:hover { background: rgba(21,72,224,0.25); }
+.button-drive { background: #0f9d58; }
+.button-drive:hover { background: #0c7a45; }
 .timeline { display: flex; flex-direction: column; gap: 4px; }
 .timeline-item { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid #2a2e38; }
 .timeline-num {
