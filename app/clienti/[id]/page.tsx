@@ -62,6 +62,18 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
           {cliente.referente ? `Referente: ${cliente.referente} · ` : ''}
           Inserito il {cliente.data_inserimento}
         </p>
+        <p>
+          {cliente.email ? <>Email: <a href={`mailto:${cliente.email}`}>{cliente.email}</a></> : 'Email: —'}
+          {' · '}
+          {cliente.telefono ? <>Telefono: <a href={`tel:${cliente.telefono}`}>{cliente.telefono}</a></> : 'Telefono: —'}
+        </p>
+        {(cliente.stato_generale || cliente.origine) && (
+          <p>
+            {cliente.stato_generale ? `Stato: ${cliente.stato_generale}` : ''}
+            {cliente.stato_generale && cliente.origine ? ' · ' : ''}
+            {cliente.origine ? `Origine: ${cliente.origine}` : ''}
+          </p>
+        )}
         {cliente.servizi_acquistati?.length > 0 && (
           <p>Servizi: {cliente.servizi_acquistati.map((s: any) => s.servizio).join(', ')}</p>
         )}
