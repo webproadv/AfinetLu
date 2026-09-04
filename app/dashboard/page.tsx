@@ -78,13 +78,13 @@ export default async function DashboardPage({
       )
     : righeComplete;
 
-  const totaliPratiche = righeComplete.length;
-  const clientiInRitardo = righeComplete.filter((r) => r.haRitardo).length;
-  const completateTot = righeComplete.reduce(
+  const totaliPratiche = righe.length;
+  const clientiInRitardo = righe.filter((r) => r.haRitardo).length;
+  const completateTot = righe.reduce(
     (acc, r) => acc + r.fasi.filter((f: any) => f.stato === 'completata').length,
     0
   );
-  const fasiTot = righeComplete.reduce((acc, r) => acc + r.fasi.length, 0);
+  const fasiTot = righe.reduce((acc, r) => acc + r.fasi.length, 0);
   const slaRispettati = fasiTot > 0 ? Math.round(((fasiTot - clientiInRitardo) / fasiTot) * 100) : 100;
 
   return (
