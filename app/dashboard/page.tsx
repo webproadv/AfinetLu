@@ -71,9 +71,9 @@ export default async function DashboardPage({
   });
 
   const righe = ownerFiltro
-    ? righeComplete.filter(({ fasi }) =>
-        fasi.some((f: any) =>
-          (f.fasi_istanza_owners || []).some((r: any) => r.utenti_owner?.nome === ownerFiltro)
+    ? righeComplete.filter(({ faseCorrente }) =>
+        (faseCorrente?.fasi_istanza_owners || []).some(
+          (r: any) => r.utenti_owner?.nome === ownerFiltro
         )
       )
     : righeComplete;
