@@ -1,33 +1,12 @@
 import { createSupabaseServerClient } from '../../lib/supabase-server';
 import { isFuoriSla } from '../../lib/sla';
 import Link from 'next/link';
-import OwnerFilter from './owner-filter';
+import ClientList from './client-list';
 
 export const dynamic = 'force-dynamic';
 
-function segClass(stato: string, fuoriSla: boolean) {
-  if (fuoriSla) return 'seg seg-red';
-  if (stato === 'completata') return 'seg seg-green';
-  if (stato === 'in_ritardo') return 'seg seg-red';
-  if (stato === 'in_corso' || stato === 'da_iniziare') return 'seg seg-amber';
-  return 'seg seg-gray';
-}
-
-const STATO_LABEL: Record<string, string> = {
-  bloccata: 'Bloccata',
-  da_iniziare: 'Da iniziare',
-  in_corso: 'In corso',
-  in_ritardo: 'In ritardo',
-  completata: 'Completata',
-};
-
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: { owner?: string };
-}) {
+export default async function DashboardPage() {
   const supabase = createSupabaseServerClient();
-  const ownerFiltro = searchParams?.owner || '';
 
   const { data: clienti, error } = await supabase
     .from('clienti')
@@ -56,7 +35,7 @@ export default async function DashboardPage({
     });
   });
 
-  const righeComplete = tutti.map((c: any) => {
+  const righe = tutti.map((c: any) => {
     const fasi = [...c.fasi_istanza].sort(
       (a: any, b: any) => a.fasi_template.numero - b.fasi_template.numero
     );
@@ -69,14 +48,6 @@ export default async function DashboardPage({
       .join(', ');
     return { cliente: c, fasi, faseCorrente, haRitardo, inCorso, ownerFaseCorrente };
   });
-
-  const righe = ownerFiltro
-    ? righeComplete.filter(({ faseCorrente }) =>
-        (faseCorrente?.fasi_istanza_owners || []).some(
-          (r: any) => r.utenti_owner?.nome === ownerFiltro
-        )
-      )
-    : righeComplete;
 
   const totaliPratiche = righe.length;
   const clientiInRitardo = righe.filter((r) => r.haRitardo).length;
@@ -111,39 +82,11 @@ export default async function DashboardPage({
       <div className="section-header">
         <h2>Pratiche clienti</h2>
         <div className="header-actions">
-          <OwnerFilter owners={owners} selected={ownerFiltro} />
           <Link href="/clienti/nuovo" className="button">+ Nuova pratica</Link>
         </div>
       </div>
 
-      <div className="client-list">
-        {righe.length === 0 && <p>Nessuna pratica trovata.</p>}
-        {righe.map(({ cliente, fasi, faseCorrente, haRitardo, inCorso, ownerFaseCorrente }) => (
-          <Link href={`/clienti/${cliente.id}`} key={cliente.id} className="client-row">
-            <div className="client-row-head">
-              <div className="client-name-wrap">
-                <span className="client-name">{cliente.ragione_sociale}</span>
-                <span className={`badge ${haRitardo ? 'badge-danger' : inCorso ? 'badge-warn' : 'badge-ok'}`}>
-                  {haRitardo ? 'In ritardo' : inCorso ? 'In corso' : 'A norma'}
-                </span>
-              </div>
-              <span className="client-row-sub">
-                Fase {faseCorrente?.fasi_template?.numero ?? '-'} · {faseCorrente?.fasi_template?.nome ?? '-'} · owner{' '}
-                {ownerFaseCorrente || '—'}
-              </span>
-            </div>
-            <div className="seg-bar">
-              {fasi.map((f: any) => (
-                <div
-                  key={f.id}
-                  className={segClass(f.stato, isFuoriSla(f))}
-                  title={`${f.fasi_template.nome}: ${isFuoriSla(f) ? 'Fuori SLA' : STATO_LABEL[f.stato]}`}
-                />
-              ))}
-            </div>
-          </Link>
-        ))}
-      </div>
+      <ClientList righe={righe} />
 
       <h3>Carico per owner</h3>
       <div className="owner-load">
