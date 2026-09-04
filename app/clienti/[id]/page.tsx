@@ -27,6 +27,20 @@ async function completaFase(faseId: string, clienteId: string) {
   revalidatePath('/dashboard');
 }
 
+async function creaCartelleDrive(clienteId: string, nomeCliente: string) {
+  'use server';
+  const { creaStrutturaCartelleCliente } = await import('../../../lib/google-drive');
+  const url = await creaStrutturaCartelleCliente(nomeCliente);
+
+  const supabase = createSupabaseServerClient();
+  const { error } = await supabase.from('clienti').update({ drive_folder_url: url }).eq('id', clienteId);
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/clienti/${clienteId}`);
+}
+
 export default async function ClienteDetailPage({ params }: { params: { id: string } }) {
   const supabase = createSupabaseServerClient();
   const { userId } = await auth();
@@ -58,6 +72,18 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
     <div>
       <div className="client-header">
         <h2>{cliente.ragione_sociale}</h2>
+        {cliente.drive_folder_url && (
+          <p>
+            <a
+              className="drive-link"
+              href={cliente.drive_folder_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              📁 Apri cartella Drive
+            </a>
+          </p>
+        )}
         <p>
           {cliente.referente ? `Referente: ${cliente.referente} · ` : ''}
           Inserito il {cliente.data_inserimento}
@@ -101,6 +127,13 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
                   Owner: {ownerNomi.length > 0 ? ownerNomi.join(', ') : '—'} · Scadenza teorica:{' '}
                   {f.data_scadenza_teorica || '—'} · Stato: {STATO_LABEL[f.stato]}
                 </p>
+                {f.fasi_template.numero === 3 && f.stato !== 'bloccata' && !cliente.drive_folder_url && sonoAssegnato && (
+                  <form action={creaCartelleDrive.bind(null, cliente.id, cliente.ragione_sociale)}>
+                    <button type="submit" className="button-sm button-drive">
+                      📁 Crea cartelle su Drive
+                    </button>
+                  </form>
+                )}
                 {puoCompletare && (
                   <form action={completaFase.bind(null, f.id, cliente.id)}>
                     <button type="submit" className="button-sm">Segna come completata</button>
