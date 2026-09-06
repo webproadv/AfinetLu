@@ -120,7 +120,7 @@ body {
 .form-card h2 { color: #f9fafb; }
 .form-card form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
 .form-card label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #d1d5db; }
-.form-card input {
+.form-card input, .form-card select {
   padding: 8px 10px; border: 1px solid #2a2e38; border-radius: 6px; font-size: 14px; background: #0f1115; color: #f3f4f6;
 }
 .form-card fieldset { border: 1px solid #2a2e38; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
