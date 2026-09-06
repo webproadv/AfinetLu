@@ -14,11 +14,46 @@ const STATO_LABEL: Record<string, string> = {
   completata: 'Completata',
 };
 
-async function completaFase(faseId: string, clienteId: string) {
+const STATO_GENERALE_LABEL: Record<string, string> = {
+  in_corso: 'In corso',
+  in_ritardo: 'In ritardo',
+  completato: 'Concluso',
+  sospeso: 'Sospeso',
+};
+
+async function completaFase(faseId: string, clienteId: string, numeroFase: number) {
   'use server';
   const supabase = createSupabaseServerClient();
 
   const { error } = await supabase.rpc('completa_fase_e_sblocca', { p_fase_id: faseId });
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  // La fase 11 è "Fatturazione": completarla registra il ciclo e, se la durata del
+  // servizio non è ancora esaurita, fa ripartire automaticamente il flusso dalla fase 5.
+  if (numeroFase === 11) {
+    const { error: erroreRinnovo } = await supabase.rpc('registra_fatturazione_e_rinnova', {
+      p_cliente_id: clienteId,
+    });
+    if (erroreRinnovo) {
+      throw new Error(erroreRinnovo.message);
+    }
+  }
+
+  revalidatePath(`/clienti/${clienteId}`);
+  revalidatePath('/dashboard');
+}
+
+async function estendiServizio(clienteId: string, formData: FormData) {
+  'use server';
+  const mesi = parseInt(String(formData.get('mesi') || '1'), 10) || 1;
+  const supabase = createSupabaseServerClient();
+
+  const { error } = await supabase.rpc('estendi_servizio_cliente', {
+    p_cliente_id: clienteId,
+    p_mesi_aggiuntivi: mesi,
+  });
   if (error) {
     throw new Error(error.message);
   }
@@ -68,6 +103,14 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
 
   const fasi = (fasiRaw || []).sort((a: any, b: any) => a.fasi_template.numero - b.fasi_template.numero);
 
+  const durataMesi = cliente.durata_servizio_mesi ?? 1;
+  const cicliFatturati = cliente.cicli_fatturati ?? 0;
+  const servizioConcluso = cliente.stato_generale === 'completato';
+  const meseCorrente = servizioConcluso ? durataMesi : Math.min(cicliFatturati + 1, durataMesi);
+  const serviziLabel = cliente.servizi_acquistati?.length > 0
+    ? cliente.servizi_acquistati.map((s: any) => s.servizio).join(', ')
+    : '—';
+
   return (
     <div>
       <div className="client-header">
@@ -95,14 +138,28 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
         </p>
         {(cliente.stato_generale || cliente.origine) && (
           <p>
-            {cliente.stato_generale ? `Stato: ${cliente.stato_generale}` : ''}
+            {cliente.stato_generale ? `Stato: ${STATO_GENERALE_LABEL[cliente.stato_generale] || cliente.stato_generale}` : ''}
             {cliente.stato_generale && cliente.origine ? ' · ' : ''}
             {cliente.origine ? `Origine: ${cliente.origine}` : ''}
           </p>
         )}
-        {cliente.servizi_acquistati?.length > 0 && (
-          <p>Servizi: {cliente.servizi_acquistati.map((s: any) => s.servizio).join(', ')}</p>
-        )}
+        <div className="servizio-box">
+          <p className="servizio-riga">
+            <span>Servizio: <b>{serviziLabel}</b></span>
+            <span>Durata: <b>{durataMesi} {durataMesi === 1 ? 'mese' : 'mesi'}</b></span>
+            <span>
+              Mese di lavorazione: <b>{meseCorrente} di {durataMesi}</b>
+              {servizioConcluso && <span className="badge badge-ok" style={{ marginLeft: 8 }}>Concluso</span>}
+            </span>
+          </p>
+          {sonoAdmin && (
+            <form action={estendiServizio.bind(null, cliente.id)} className="servizio-rinnova">
+              <label htmlFor="mesi">Aggiungi mesi e rinnova:</label>
+              <input type="number" id="mesi" name="mesi" min={1} defaultValue={1} />
+              <button type="submit" className="button-sm">🔄 Rinnova servizio</button>
+            </form>
+          )}
+        </div>
       </div>
 
       <div className="timeline">
@@ -135,7 +192,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
                   </form>
                 )}
                 {puoCompletare && (
-                  <form action={completaFase.bind(null, f.id, cliente.id)}>
+                  <form action={completaFase.bind(null, f.id, cliente.id, f.fasi_template.numero)}>
                     <button type="submit" className="button-sm">Segna come completata</button>
                   </form>
                 )}
