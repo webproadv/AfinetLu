@@ -12,6 +12,7 @@ async function creaCliente(formData: FormData) {
   const data_inserimento = String(formData.get('data_inserimento') || '');
   const servizio = String(formData.get('servizio') || '').trim();
   const costo = formData.get('costo') ? Number(formData.get('costo')) : null;
+  const durata_servizio_mesi = Math.max(1, parseInt(String(formData.get('durata_servizio_mesi') || '1'), 10) || 1);
   const riprese_mensili = formData.get('riprese_mensili') === '2' ? 2 : 1;
 
   if (!ragione_sociale || !data_inserimento) {
@@ -20,7 +21,16 @@ async function creaCliente(formData: FormData) {
 
   const { data: cliente, error } = await supabase
     .from('clienti')
-    .insert({ ragione_sociale, referente, email, telefono, data_inserimento, origine: 'manuale', riprese_mensili })
+    .insert({
+      ragione_sociale,
+      referente,
+      email,
+      telefono,
+      data_inserimento,
+      origine: 'manuale',
+      durata_servizio_mesi,
+      riprese_mensili,
+    })
     .select('id')
     .single();
 
@@ -70,6 +80,10 @@ export default function NuovoClientePage() {
           <label>
             Costo (€)
             <input name="costo" type="number" step="0.01" />
+          </label>
+          <label>
+            Durata servizio (mesi)
+            <input name="durata_servizio_mesi" type="number" min={1} defaultValue={1} />
           </label>
           <label>
             Riprese mensili
