@@ -29,7 +29,7 @@ export default async function StampaClientiPage() {
     const daFatturare = Math.max(durata - fatturati, 0);
     const servizioLabel = c.servizi_acquistati?.length > 0
       ? c.servizi_acquistati.map((s: any) => s.servizio).join(', ')
-      : '\u2014';
+      : '—';
     return {
       id: c.id,
       nome: c.ragione_sociale,
@@ -37,7 +37,7 @@ export default async function StampaClientiPage() {
       durata,
       fatturati,
       daFatturare,
-      stato: STATO_GENERALE_LABEL[c.stato_generale] || c.stato_generale || '\u2014',
+      stato: STATO_GENERALE_LABEL[c.stato_generale] || c.stato_generale || '—',
     };
   });
 
@@ -49,13 +49,13 @@ export default async function StampaClientiPage() {
       <div className="section-header no-print">
         <h2>Stampa lista clienti</h2>
         <div className="header-actions">
-          <Link href="/dashboard" className="button-sm">\u2190 Torna alla dashboard</Link>
+          <Link href="/dashboard" className="button-sm">← Torna alla dashboard</Link>
           <PrintButton />
         </div>
       </div>
 
       <div className="stampa-intestazione">
-        <h1>Afinet \u2014 Servizi clienti</h1>
+        <h1>Afinet — Servizi clienti</h1>
         <p>Generato il {new Date().toLocaleDateString('it-IT')}</p>
       </div>
 
