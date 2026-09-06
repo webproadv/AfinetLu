@@ -12,6 +12,7 @@ async function creaCliente(formData: FormData) {
   const data_inserimento = String(formData.get('data_inserimento') || '');
   const servizio = String(formData.get('servizio') || '').trim();
   const costo = formData.get('costo') ? Number(formData.get('costo')) : null;
+  const riprese_mensili = formData.get('riprese_mensili') === '2' ? 2 : 1;
 
   if (!ragione_sociale || !data_inserimento) {
     throw new Error('Ragione sociale e data di inserimento sono obbligatorie');
@@ -19,7 +20,7 @@ async function creaCliente(formData: FormData) {
 
   const { data: cliente, error } = await supabase
     .from('clienti')
-    .insert({ ragione_sociale, referente, email, telefono, data_inserimento, origine: 'manuale' })
+    .insert({ ragione_sociale, referente, email, telefono, data_inserimento, origine: 'manuale', riprese_mensili })
     .select('id')
     .single();
 
@@ -69,6 +70,13 @@ export default function NuovoClientePage() {
           <label>
             Costo (€)
             <input name="costo" type="number" step="0.01" />
+          </label>
+          <label>
+            Riprese mensili
+            <select name="riprese_mensili" defaultValue="1">
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
           </label>
         </fieldset>
         <button type="submit" className="button">Crea pratica</button>
