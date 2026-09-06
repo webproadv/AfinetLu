@@ -86,6 +86,22 @@ body {
 .drive-link:hover { background: rgba(21,72,224,0.25); }
 .button-drive { background: #0f9d58; }
 .button-drive:hover { background: #0c7a45; }
+.servizio-box {
+  margin-top: 10px; background: #1a1d24; border: 1px solid #2a2e38; border-radius: 10px;
+  padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.servizio-riga { display: flex !important; flex-wrap: wrap; gap: 6px 20px; margin: 0 !important; font-size: 14px !important; color: #d1d5db !important; }
+.servizio-riga b { color: #f9fafb; }
+.servizio-rinnova { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.servizio-rinnova label { font-size: 13px; color: #9ca3af; }
+.servizio-rinnova input {
+  width: 64px; padding: 6px 8px; border: 1px solid #2a2e38; border-radius: 6px;
+  font-size: 14px; background: #0f1115; color: #f3f4f6;
+}
+.servizio-rinnova .button-sm { margin-top: 0; background: #7c3aed; }
+.servizio-rinnova .button-sm:hover { background: #6428c9; }
+.print-link { margin-top: 0; background: #1a1d24; border: 1px solid #2a2e38; }
+.print-link:hover { background: #22262f; }
 .timeline { display: flex; flex-direction: column; gap: 4px; }
 .timeline-item { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid #2a2e38; }
 .timeline-num {
@@ -110,3 +126,24 @@ body {
 .form-card fieldset { border: 1px solid #2a2e38; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .form-card legend { font-size: 13px; font-weight: 600; padding: 0 4px; color: #d1d5db; }
 h2, h3 { color: #f9fafb; }
+
+.stampa-clienti { max-width: 900px; }
+.stampa-intestazione { display: none; }
+.stampa-intestazione h1 { margin: 0 0 4px; }
+.stampa-intestazione p { margin: 0 0 20px; color: #9ca3af; font-size: 13px; }
+.stampa-tabella { width: 100%; border-collapse: collapse; margin-top: 16px; }
+.stampa-tabella th, .stampa-tabella td {
+  text-align: left; padding: 8px 12px; border-bottom: 1px solid #2a2e38; font-size: 14px;
+}
+.stampa-tabella th { color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
+.stampa-tabella tfoot td { font-weight: 700; color: #f9fafb; border-top: 2px solid #2a2e38; border-bottom: none; }
+
+@media print {
+  .topbar, .no-print { display: none !important; }
+  .container { max-width: none; padding: 0; margin: 0; }
+  body { background: #ffffff; color: #111; }
+  .stampa-intestazione { display: block; }
+  .stampa-tabella th, .stampa-tabella td { color: #111; border-bottom: 1px solid #ccc; }
+  .stampa-tabella th { color: #444; }
+  .stampa-tabella tfoot td { color: #000; border-top: 2px solid #000; }
+}
