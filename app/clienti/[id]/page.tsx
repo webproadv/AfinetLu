@@ -30,6 +30,17 @@ async function completaFase(faseId: string, clienteId: string, numeroFase: numbe
     throw new Error(error.message);
   }
 
+  // La fase 10 è "Report e feedback cliente": se il cliente ha 2 riprese mensili e questo
+  // è il primo giro del ciclo, il flusso deve rifare le fasi 6-10 prima di poter fatturare.
+  if (numeroFase === 10) {
+    const { error: erroreRipresa } = await supabase.rpc('gestisci_ripetizione_riprese', {
+      p_cliente_id: clienteId,
+    });
+    if (erroreRipresa) {
+      throw new Error(erroreRipresa.message);
+    }
+  }
+
   // La fase 11 è "Fatturazione": completarla registra il ciclo e, se la durata del
   // servizio non è ancora esaurita, fa ripartire automaticamente il flusso dalla fase 5.
   if (numeroFase === 11) {
@@ -105,6 +116,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
 
   const durataMesi = cliente.durata_servizio_mesi ?? 1;
   const cicliFatturati = cliente.cicli_fatturati ?? 0;
+  const ripreseMensili = cliente.riprese_mensili ?? 1;
   const servizioConcluso = cliente.stato_generale === 'completato';
   const meseCorrente = servizioConcluso ? durataMesi : Math.min(cicliFatturati + 1, durataMesi);
   const serviziLabel = cliente.servizi_acquistati?.length > 0
@@ -147,6 +159,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
           <p className="servizio-riga">
             <span>Servizio: <b>{serviziLabel}</b></span>
             <span>Durata: <b>{durataMesi} {durataMesi === 1 ? 'mese' : 'mesi'}</b></span>
+            <span>Riprese mensili: <b>{ripreseMensili}</b></span>
             <span>
               Mese di lavorazione: <b>{meseCorrente} di {durataMesi}</b>
               {servizioConcluso && <span className="badge badge-ok" style={{ marginLeft: 8 }}>Concluso</span>}
