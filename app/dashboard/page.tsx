@@ -82,6 +82,7 @@ export default async function DashboardPage() {
       <div className="section-header">
         <h2>Pratiche clienti</h2>
         <div className="header-actions">
+          <Link href="/clienti/stampa" className="button-sm print-link">🖨️ Stampa lista clienti</Link>
           <Link href="/clienti/nuovo" className="button">+ Nuova pratica</Link>
         </div>
       </div>
