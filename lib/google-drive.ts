@@ -22,6 +22,35 @@ function base64url(input: Buffer | string) {
     .replace(/=+$/, '');
 }
 
+// Ripulisce la chiave privata da errori comuni di copia-incolla su Vercel:
+// virgolette attorno al valore, un eventuale prefisso "NOME_VARIABILE=" incollato
+// per sbaglio dentro il campo valore, "\n" letterali invece di vere andate a capo,
+// interruzioni di riga in stile Windows (CRLF) e spazi superflui a inizio/fine.
+function normalizePrivateKey(raw: string): string {
+  let key = raw.trim();
+
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1).trim();
+  }
+
+  const beginMarker = key.indexOf('-----BEGIN');
+  if (beginMarker > 0) {
+    key = key.slice(beginMarker);
+  }
+
+  if (key.includes('\\n')) {
+    key = key.replace(/\\n/g, '\n');
+  }
+
+  key = key.replace(/\r\n/g, '\n').trim();
+
+  if (!key.endsWith('-----END PRIVATE KEY-----') && !key.endsWith('\n')) {
+    key += '\n';
+  }
+
+  return key;
+}
+
 async function getAccessToken(): Promise<string> {
   const clientEmail = process.env.GOOGLE_DRIVE_CLIENT_EMAIL;
   const privateKeyRaw = process.env.GOOGLE_DRIVE_PRIVATE_KEY;
@@ -32,7 +61,13 @@ async function getAccessToken(): Promise<string> {
     );
   }
 
-  const privateKey = privateKeyRaw.includes('\\n') ? privateKeyRaw.replace(/\\n/g, '\n') : privateKeyRaw;
+  const privateKey = normalizePrivateKey(privateKeyRaw);
+
+  if (!privateKey.includes('-----BEGIN PRIVATE KEY-----') || !privateKey.includes('-----END PRIVATE KEY-----')) {
+    throw new Error(
+      'Google Drive: GOOGLE_DRIVE_PRIVATE_KEY su Vercel non sembra una chiave PEM valida (mancano i marcatori BEGIN/END). Ricontrolla il valore incollato.'
+    );
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: 'RS256', typ: 'JWT' };
