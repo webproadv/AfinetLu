@@ -18,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <SignedIn>
                 <Link href="/dashboard">Dashboard</Link>
                 <Link href="/clienti/nuovo">Nuovo cliente</Link>
+                <Link href="/classifica">Classifica</Link>
                 <UserButton afterSignOutUrl="/sign-in" />
               </SignedIn>
               <SignedOut>
