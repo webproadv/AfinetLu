@@ -72,11 +72,14 @@ export default async function ClassificaPage({
     .order('posizione', { ascending: true });
   const classifica = classificaRaw || [];
 
-  const { data: premiRaw } = await supabase
+  const { data: premiRaw, error: erroreQueryPremi } = await supabase
     .from('premi_assegnati')
-    .select('*, utenti_owner(nome)')
+    .select('*, utenti_owner!premi_assegnati_utente_id_fkey(nome)')
     .eq('periodo', periodo)
     .order('assegnato_il', { ascending: false });
+  if (erroreQueryPremi) {
+    throw new Error(erroreQueryPremi.message);
+  }
   const premi = premiRaw || [];
 
   const { data: staffRaw } = await supabase
