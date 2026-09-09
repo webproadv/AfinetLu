@@ -2,7 +2,8 @@ import { createSupabaseServerClient } from '../../../lib/supabase-server';
 import { isFuoriSla } from '../../../lib/sla';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import DeleteClientButton from './delete-client-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,6 +86,19 @@ async function creaCartelleDrive(clienteId: string, nomeCliente: string) {
   }
 
   revalidatePath(`/clienti/${clienteId}`);
+}
+
+async function eliminaCliente(clienteId: string) {
+  'use server';
+  const supabase = createSupabaseServerClient();
+
+  const { error } = await supabase.rpc('elimina_cliente', { p_cliente_id: clienteId });
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath('/dashboard');
+  redirect('/dashboard');
 }
 
 export default async function ClienteDetailPage({ params }: { params: { id: string } }) {
@@ -173,6 +187,15 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
             </form>
           )}
         </div>
+
+        {sonoAdmin && (
+          <div className="danger-zone">
+            <DeleteClientButton
+              action={eliminaCliente.bind(null, cliente.id)}
+              nomeCliente={cliente.ragione_sociale}
+            />
+          </div>
+        )}
       </div>
 
       <div className="timeline">
