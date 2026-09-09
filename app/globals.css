@@ -102,6 +102,9 @@ body {
 .servizio-rinnova .button-sm:hover { background: #6428c9; }
 .print-link { margin-top: 0; background: #1a1d24; border: 1px solid #2a2e38; }
 .print-link:hover { background: #22262f; }
+.danger-zone { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #3a2a2a; }
+.button-danger { background: transparent; border: 1px solid #7f1d1d; color: #f87171; margin-top: 0; }
+.button-danger:hover { background: rgba(248,113,113,0.12); border-color: #f87171; }
 .timeline { display: flex; flex-direction: column; gap: 4px; }
 .timeline-item { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid #2a2e38; }
 .timeline-num {
