@@ -130,6 +130,35 @@ body {
 .form-card legend { font-size: 13px; font-weight: 600; padding: 0 4px; color: #d1d5db; }
 h2, h3 { color: #f9fafb; }
 
+.cliente-layout { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+.cliente-principale { flex: 1 1 560px; min-width: 0; }
+.note-lavorazione {
+  flex: 0 0 320px; width: 320px; position: sticky; top: 24px;
+  background: #1a1d24; border: 1px solid #2a2e38; border-radius: 12px;
+  padding: 18px; display: flex; flex-direction: column; gap: 12px;
+}
+.note-lavorazione-head { display: flex; align-items: center; justify-content: space-between; }
+.note-lavorazione-head h3 { margin: 0; font-size: 15px; }
+.note-crea-btn { width: 100%; text-align: center; margin-top: 0; }
+.note-list { display: flex; flex-direction: column; gap: 12px; }
+.nota-card {
+  background: #0f1115; border: 1px solid #2a2e38; border-radius: 10px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+}
+.nota-data { margin: 0; font-size: 12px; font-weight: 600; color: #9ca3af; }
+.nota-testo { margin: 0; font-size: 13.5px; line-height: 1.5; color: #e5e7eb; white-space: pre-line; }
+.nota-azioni { display: flex; justify-content: flex-end; gap: 8px; }
+.nota-azioni .button-sm { margin-top: 0; padding: 5px 10px; font-size: 12.5px; }
+.nota-form textarea, .nota-card textarea {
+  width: 100%; resize: vertical; background: #0f1115; border: 1px solid #2a2e38; border-radius: 8px;
+  padding: 10px; color: #f3f4f6; font-size: 13.5px; font-family: inherit; line-height: 1.5;
+}
+.nota-form { background: #0f1115; }
+
+@media (max-width: 860px) {
+  .note-lavorazione { flex: 1 1 100%; width: 100%; position: static; }
+}
+
 .stampa-clienti { max-width: 900px; }
 .stampa-intestazione { display: none; }
 .stampa-intestazione h1 { margin: 0 0 4px; }

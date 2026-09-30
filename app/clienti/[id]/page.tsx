@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import DeleteClientButton from './delete-client-button';
+import NoteLavorazione from './note-lavorazione';
 
 export const dynamic = 'force-dynamic';
 
@@ -128,6 +129,20 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
 
   const fasi = (fasiRaw || []).sort((a: any, b: any) => a.fasi_template.numero - b.fasi_template.numero);
 
+  const { data: noteRaw } = await supabase
+    .from('note_lavorazione')
+    .select('id, data_nota, contenuto, creato_il, utenti_owner(nome)')
+    .eq('cliente_id', params.id)
+    .order('data_nota', { ascending: false })
+    .order('creato_il', { ascending: false });
+
+  const note = (noteRaw || []).map((n: any) => ({
+    id: n.id,
+    data_nota: n.data_nota,
+    contenuto: n.contenuto,
+    autore: n.utenti_owner?.nome ?? null,
+  }));
+
   const durataMesi = cliente.durata_servizio_mesi ?? 1;
   const cicliFatturati = cliente.cicli_fatturati ?? 0;
   const ripreseMensili = cliente.riprese_mensili ?? 1;
@@ -138,7 +153,8 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
     : '—';
 
   return (
-    <div>
+    <div className="cliente-layout">
+    <div className="cliente-principale">
       <div className="client-header">
         <h2>{cliente.ragione_sociale}</h2>
         {cliente.drive_folder_url && (
@@ -242,6 +258,9 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
           );
         })}
       </div>
+    </div>
+
+    <NoteLavorazione clienteId={cliente.id} note={note} />
     </div>
   );
 }
