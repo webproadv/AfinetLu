@@ -77,11 +77,35 @@ async function estendiServizio(clienteId: string, formData: FormData) {
 
 async function creaCartelleDrive(clienteId: string, nomeCliente: string) {
   'use server';
+  const supabase = createSupabaseServerClient();
+
+  // 1) Verifica permessi PRIMA di toccare Drive (evita cartelle orfane)
+  const { data: autorizzato, error: errorePermessi } = await supabase.rpc('utente_puo_operare_su_cliente', {
+    p_cliente_id: clienteId,
+  });
+  if (errorePermessi) {
+    throw new Error(errorePermessi.message);
+  }
+  if (!autorizzato) {
+    throw new Error('Non hai i permessi per creare le cartelle di questo cliente.');
+  }
+
+  // 2) Evita duplicati se la cartella è già stata creata (doppio click / altro utente)
+  const { data: esistente } = await supabase
+    .from('clienti')
+    .select('drive_folder_url')
+    .eq('id', clienteId)
+    .maybeSingle();
+  if (esistente?.drive_folder_url) {
+    revalidatePath(`/clienti/${clienteId}`);
+    return;
+  }
+
+  // 3) Crea su Drive e salva il link tramite RPC (non bloccata dalle policy RLS)
   const { creaStrutturaCartelleCliente } = await import('../../../lib/google-drive');
   const url = await creaStrutturaCartelleCliente(nomeCliente);
 
-  const supabase = createSupabaseServerClient();
-  const { error } = await supabase.from('clienti').update({ drive_folder_url: url }).eq('id', clienteId);
+  const { error } = await supabase.rpc('imposta_drive_folder', { p_cliente_id: clienteId, p_url: url });
   if (error) {
     throw new Error(error.message);
   }
