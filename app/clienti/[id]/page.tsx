@@ -140,11 +140,13 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
 
   const { data: ioRaw } = await supabase
     .from('utenti_owner')
-    .select('id, ruolo')
+    .select('id, ruolo, puo_eliminare_clienti, puo_estendere_servizio')
     .eq('clerk_user_id', userId)
     .maybeSingle();
   const io: any = ioRaw;
   const sonoAdmin = io?.ruolo === 'admin' || io?.ruolo === 'superadmin';
+  const puoEstendere = sonoAdmin || !!io?.puo_estendere_servizio;
+  const puoEliminare = sonoAdmin || !!io?.puo_eliminare_clienti;
 
   const { data: fasiRaw } = await supabase
     .from('fasi_istanza')
@@ -219,7 +221,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
               {servizioConcluso && <span className="badge badge-ok" style={{ marginLeft: 8 }}>Concluso</span>}
             </span>
           </p>
-          {sonoAdmin && (
+          {puoEstendere && (
             <form action={estendiServizio.bind(null, cliente.id)} className="servizio-rinnova">
               <label htmlFor="mesi">Aggiungi mesi e rinnova:</label>
               <input type="number" id="mesi" name="mesi" min={1} defaultValue={1} />
@@ -228,7 +230,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
           )}
         </div>
 
-        {sonoAdmin && (
+        {puoEliminare && (
           <div className="danger-zone">
             <DeleteClientButton
               action={eliminaCliente.bind(null, cliente.id)}
