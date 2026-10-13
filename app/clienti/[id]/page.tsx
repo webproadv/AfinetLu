@@ -3,6 +3,7 @@ import { isFuoriSla } from '../../../lib/sla';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
+import Link from 'next/link';
 import DeleteClientButton from './delete-client-button';
 import NoteLavorazione from './note-lavorazione';
 
@@ -150,7 +151,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
 
   const { data: fasiRaw } = await supabase
     .from('fasi_istanza')
-    .select('*, fasi_template(*), fasi_istanza_owners(utenti_owner(id, nome))')
+    .select('*, fasi_template(*), fasi_istanza_owners(utenti_owner(id, nome, attivo))')
     .eq('cliente_id', params.id);
 
   const fasi = (fasiRaw || []).sort((a: any, b: any) => a.fasi_template.numero - b.fasi_template.numero);
@@ -183,6 +184,13 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
     <div className="cliente-principale">
       <div className="client-header">
         <h2>{cliente.ragione_sociale}</h2>
+        {sonoAdmin && (
+          <p>
+            <Link href={`/clienti/${cliente.id}/modifica`} className="button-sm print-link">
+              ✏️ Modifica cliente
+            </Link>
+          </p>
+        )}
         {cliente.drive_folder_url && (
           <p>
             <a
@@ -243,6 +251,7 @@ export default async function ClienteDetailPage({ params }: { params: { id: stri
       <div className="timeline">
         {fasi.map((f: any) => {
           const ownerNomi = (f.fasi_istanza_owners || [])
+            .filter((r: any) => r.utenti_owner?.attivo !== false)
             .map((r: any) => r.utenti_owner?.nome)
             .filter(Boolean);
           const sonoAssegnato =

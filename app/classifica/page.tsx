@@ -67,10 +67,10 @@ export default async function ClassificaPage({
 
   const { data: classificaRaw } = await supabase
     .from('punteggi_periodo')
-    .select('*, utenti_owner(nome, ruolo)')
+    .select('*, utenti_owner(nome, ruolo, attivo)')
     .eq('periodo', periodo)
     .order('posizione', { ascending: true });
-  const classifica = classificaRaw || [];
+  const classifica = (classificaRaw || []).filter((r: any) => r.utenti_owner?.attivo !== false);
 
   const { data: premiRaw, error: erroreQueryPremi } = await supabase
     .from('premi_assegnati')

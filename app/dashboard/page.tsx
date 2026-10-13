@@ -11,11 +11,11 @@ export default async function DashboardPage() {
   const { data: clienti, error } = await supabase
     .from('clienti')
     .select(
-      'id, ragione_sociale, fasi_istanza(id, stato, data_scadenza_teorica, fasi_template(numero, nome), fasi_istanza_owners(utenti_owner(id, nome)))'
+      'id, ragione_sociale, fasi_istanza(id, stato, data_scadenza_teorica, fasi_template(numero, nome), fasi_istanza_owners(utenti_owner(id, nome, attivo)))'
     )
     .order('creato_il', { ascending: false });
 
-  const { data: ownerRows } = await supabase.from('utenti_owner').select('id, nome, ruolo');
+  const { data: ownerRows } = await supabase.from('utenti_owner').select('id, nome, ruolo').eq('attivo', true);
 
   if (error) {
     return <p>Errore nel caricamento dati: {error.message}</p>;
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     c.fasi_istanza.forEach((f: any) => {
       if (f.stato === 'completata') return;
       (f.fasi_istanza_owners || []).forEach((r: any) => {
-        const nome = r.utenti_owner?.nome;
+        const nome = r.utenti_owner?.attivo === false ? null : r.utenti_owner?.nome;
         if (nome) carico[nome] = (carico[nome] || 0) + 1;
       });
     });
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
     const haRitardo = fasi.some((f: any) => f.stato === 'in_ritardo' || isFuoriSla(f));
     const inCorso = !haRitardo && fasi.some((f: any) => f.stato === 'in_corso' || f.stato === 'da_iniziare');
     const ownerFaseCorrente = (faseCorrente?.fasi_istanza_owners || [])
-      .map((r: any) => r.utenti_owner?.nome)
+      .map((r: any) => (r.utenti_owner?.attivo === false ? null : r.utenti_owner?.nome))
       .filter(Boolean)
       .join(', ');
     return { cliente: c, fasi, faseCorrente, haRitardo, inCorso, ownerFaseCorrente };
