@@ -55,6 +55,14 @@ async function completaFase(faseId: string, clienteId: string, numeroFase: numbe
     }
   }
 
+  // Notifica email agli owner delle fasi appena sbloccate (non blocca mai il completamento)
+  try {
+    const { inviaNotifiche } = await import('../../../lib/notifiche');
+    await inviaNotifiche(['sblocco']);
+  } catch (e) {
+    console.error('Invio notifiche fallito', e);
+  }
+
   revalidatePath(`/clienti/${clienteId}`);
   revalidatePath('/dashboard');
 }
