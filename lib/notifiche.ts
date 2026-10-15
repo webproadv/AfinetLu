@@ -84,16 +84,13 @@ function costruisciEmail(tipo: TipoNotifica, nome: string, righe: Riga[]) {
     .join('');
 
   const html = `<div style="font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:15px;color:#111827;max-width:560px">
-<p>Ciao ${esc(nome)},</p><p>${intro}</p><ul style="padding-left:18px">${items}</ul>${
-    url ? `<p><a href="${esc(url)}/dashboard" style="color:#1548e0">Apri Afinet</a></p>` : ''
-  }<p style="color:#9ca3af;font-size:12px">Notifica automatica di Afinet.</p></div>`;
+<p>Ciao ${esc(nome)},</p><p>${intro}</p><ul style="padding-left:18px">${items}</ul><p style="color:#9ca3af;font-size:12px">Notifica automatica di Afinet.</p></div>`;
 
   const testo =
     `Ciao ${nome},\n\n${intro}\n\n` +
     righe
       .map((r) => `- ${r.cliente} – Fase ${r.fase_numero} ${r.fase_nome} (scadenza ${formatData(r.scadenza)})`)
-      .join('\n') +
-    (url ? `\n\n${url}/dashboard` : '');
+      .join('\n');
 
   return { oggetto, html, testo };
 }
